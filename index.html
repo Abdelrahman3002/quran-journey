@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رحلة السير عبر العواصم | التحدي القرآني المبارك</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Amiri & Cairo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emeraldCustom: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        },
+                        goldCustom: {
+                            100: '#fef9c3',
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                        },
+                        sandCustom: '#faf5ef'
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        amiri: ['Amiri', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #041c15;
+            color: #f3f4f6;
+            background-image: radial-gradient(rgba(16, 185, 129, 0.08) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #022c22;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #047857;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #eab308;
+        }
+
+        /* Map styling & Pulse animations */
+        .city-node {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .city-node:hover {
+            transform: scale(1.15) translateY(-4px);
+        }
+
+        .pulse-gold {
+            box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7);
+            animation: pulse-gold-anim 2s infinite;
+        }
+
+        @keyframes pulse-gold-anim {
+            0% {
+                box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(234, 179, 8, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(234, 179, 8, 0);
+            }
+        }
+
+        .avatar-traveler {
+            transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .glass-card {
+            background: rgba(6, 78, 59, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+        }
+        
+        .glass-card-gold {
+            background: rgba(202, 138, 4, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(250, 204, 21, 0.4);
+        }
+
+        /* Animated Dashed Path */
+        .path-line {
+            stroke-dasharray: 8, 8;
+            animation: dash 30s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+    
+body{background-image:radial-gradient(circle at 50% -10%,rgba(234,179,8,.14),transparent 45%),radial-gradient(rgba(16,185,129,.08) 1px,transparent 0);background-size:100% 100%,24px 24px;background-attachment:fixed,scroll}
+.animate-fade-in{animation:fi .4s ease}@keyframes fi{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.glass-card{transition:border-color .3s,transform .3s}.glass-card:hover{border-color:rgba(234,179,8,.4)}
+.badge-lock{filter:grayscale(1);opacity:.35}
+#toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,120px);background:linear-gradient(90deg,#ca8a04,#facc15);color:#022c22;font-weight:700;padding:12px 22px;border-radius:999px;z-index:60;transition:transform .5s cubic-bezier(.34,1.56,.64,1);box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:90vw;text-align:center}
+#toast.show{transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-10">
+
+    <!-- Navbar / Header -->
+    <header class="border-b border-goldCustom-500/30 bg-emeraldCustom-950/80 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-goldCustom-600 to-goldCustom-400 flex items-center justify-center text-emeraldCustom-950 shadow-lg shadow-goldCustom-500/20 font-bold text-xl">
+                    <i class="fa-solid font-amiri">📖</i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold font-amiri text-goldCustom-400 tracking-wide">رحلة السير عبر العواصم</h1>
+                    <p class="text-xs text-emeraldCustom-100/70">تحدي حفظ القرآن الكريم للأزواج</p>
+                </div>
+            </div>
+
+            <!-- Header Quick Stats -->
+            <div class="flex items-center gap-3 md:gap-6 bg-emeraldCustom-900/60 px-4 py-2 rounded-xl border border-goldCustom-500/20 text-sm">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-fire text-amber-500 text-lg animate-bounce"></i>
+                    <div>
+                        <span class="block text-[10px] text-gray-400">التتابع (Streak)</span>
+                        <span id="streakCount" class="font-bold text-amber-400">0 يوم</span>
+                    </div>
+                </div>
+                <div class="h-6 w-px bg-emeraldCustom-700/50"></div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-route text-goldCustom-400 text-lg"></i>
+                    <div>
+                        <span class="block text-[10px] text-gray-400">المسافة الكلية</span>
+                        <span id="totalKmDisplay" class="font-bold text-goldCustom-300">0 / 3000 كم</span>
+                    </div>
+                </div>
+                <button onclick="openSettingsModal()" class="mr-2 text-gray-400 hover:text-goldCustom-400 transition" title="إعدادات الأسماء">
+                    <i class="fa-solid fa-gear text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full space-y-8 flex-grow">
+
+        <!-- Banner & Quick Quote -->
+        <section class="glass-card rounded-2xl p-4 md:p-6 text-center relative overflow-hidden border-b-2 border-b-goldCustom-500">
+            <div class="absolute -right-10 -bottom-10 text-emeraldCustom-800/20 text-9xl pointer-events-none font-amiri">🕌</div>
+            <p id="dailyVerse" class="text-goldCustom-300 font-amiri text-xl md:text-2xl leading-relaxed"></p><p id="dailySrc" class="text-[11px] text-emeraldCustom-200/60 mt-1"></p>
+            <p id="coupleNamesTitle" class="text-sm md:text-base text-emeraldCustom-100/80 mt-2 font-semibold">
+                رحلة المباركين: <span id="partner1NameDisplay" class="text-goldCustom-400">العريس</span> & <span id="partner2NameDisplay" class="text-goldCustom-400">العروس</span>
+            </p>
+        </section>
+
+        <!-- Interactive Visual Journey Map -->
+        <section class="glass-card rounded-3xl p-4 md:p-8 relative shadow-2xl overflow-hidden">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold font-amiri text-goldCustom-400 flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot"></i> خريطة المعالم القرآنية
+                    </h2>
+                    <p class="text-xs md:text-sm text-emerald-200/60">كل إنجاز ينقلكما مسافة أقرب إلى العاصمة التالية والمكافأة الجليلة!</p>
+                </div>
+                <span id="currentCityBadge" class="bg-gradient-to-r from-goldCustom-600 to-amber-600 text-emeraldCustom-950 font-bold px-4 py-1.5 rounded-full text-xs md:text-sm shadow-md">
+                    الموقع الحالي: مكة المكرمة
+                </span>
+            </div>
+
+            <!-- Map Wrapper -->
+            <div class="relative w-full overflow-x-auto py-8 px-2 scrollbar-none">
+                <div class="min-w-[850px] relative h-64 flex items-center justify-between px-12">
+                    
+                    <!-- SVG Path Background -->
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none"><line x1="48" y1="50%" x2="calc(100% - 48px)" y2="50%" stroke="rgba(234,179,8,.2)" stroke-width="6" stroke-linecap="round"/><line x1="48" y1="50%" x2="calc(100% - 48px)" y2="50%" stroke="#eab308" stroke-width="3" class="path-line"/></svg>
+
+                    <!-- City Nodes (Generated Dynamically via JS) -->
+                    <div id="citiesContainer" class="w-full flex justify-between items-center relative z-10">
+                        <!-- JS injects nodes here -->
+                    </div>
+
+                    <!-- Traveling Couple Avatar -->
+                    <div id="travelerAvatar" class="avatar-traveler absolute top-1/2 -translate-y-1/2 z-20 flex flex-col items-center pointer-events-none" style="right: 50px;">
+                        <div class="bg-gradient-to-r from-goldCustom-400 to-amber-500 text-emeraldCustom-950 px-3 py-1 rounded-full text-xs font-bold shadow-xl flex items-center gap-1 border border-white/50 mb-1 animate-bounce">
+                            <span>👩‍❤️‍👨</span>
+                            <span id="avatarLabel">نحن هنا!</span>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-goldCustom-400 border-2 border-white flex items-center justify-center shadow-lg text-emeraldCustom-950 text-lg">
+                            <i class="fa-solid fa-kaaba"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Visual Progress Bar -->
+            <div class="mt-4 bg-emeraldCustom-950/80 rounded-2xl p-4 border border-emeraldCustom-700/50">
+                <div class="flex justify-between text-xs text-emeraldCustom-200/80 mb-2 font-semibold">
+                    <span>بداية المسار (0 كم)</span>
+                    <span id="progressPercentageText" class="text-goldCustom-400 font-bold">0% مكتمل</span>
+                    <span>النهاية - قرطبة (3000 كم)</span>
+                </div>
+                <div class="w-full bg-emeraldCustom-900 rounded-full h-4 overflow-hidden p-0.5 border border-emeraldCustom-700/40">
+                    <div id="progressBarFill" class="bg-gradient-to-r from-emeraldCustom-500 via-goldCustom-500 to-amber-400 h-full rounded-full transition-all duration-700 w-0 shadow-lg"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+ <div class="glass-card rounded-2xl p-4 text-center"><div class="text-2xl">🎯</div><div class="text-[11px] text-emeraldCustom-200/70">إنجاز اليوم</div><div id="statToday" class="font-bold text-goldCustom-300 text-lg"></div></div>
+ <div class="glass-card rounded-2xl p-4 text-center"><div class="text-2xl">📖</div><div class="text-[11px] text-emeraldCustom-200/70">أوجه البقرة المحفوظة</div><div id="statPages" class="font-bold text-goldCustom-300 text-lg"></div></div>
+ <div class="glass-card rounded-2xl p-4 text-center"><div class="text-2xl">📅</div><div class="text-[11px] text-emeraldCustom-200/70">أيام النشاط · أفضل تتابع</div><div id="statDays" class="font-bold text-goldCustom-300 text-lg"></div></div>
+ <div class="glass-card rounded-2xl p-4 text-center"><div class="text-2xl">🧭</div><div class="text-[11px] text-emeraldCustom-200/70">المحطة القادمة</div><div id="statNext" class="font-bold text-goldCustom-300 text-sm leading-7"></div></div>
+</section>
+<!-- Tasks and Log Section (2 Columns) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Column 1: Daily Tasks Check-in ( Partner 1 & Partner 2 Tabs ) -->
+            <section class="lg:col-span-7 glass-card rounded-3xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold font-amiri text-goldCustom-400 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check"></i> قائمة المهام اليومية
+                        </h3>
+                        <span class="text-xs bg-emeraldCustom-900 px-3 py-1 rounded-full border border-emeraldCustom-700 text-emeraldCustom-100">
+                            يتجدد التقدم يومياً
+                        </span>
+                    </div>
+
+                    <!-- Partner Selector Tabs -->
+                    <div class="flex bg-emeraldCustom-950/80 p-1.5 rounded-2xl border border-emeraldCustom-800 mb-6">
+                        <button onclick="switchTaskTab('p1')" id="tabBtnP1" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 bg-gradient-to-r from-goldCustom-500 to-amber-600 text-emeraldCustom-950 shadow-md">
+                            <i class="fa-solid fa-user"></i> <span id="tabP1Name">العريس</span>
+                        </button>
+                        <button onclick="switchTaskTab('p2')" id="tabBtnP2" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 text-emeraldCustom-200/70 hover:text-white">
+                            <i class="fa-solid fa-user-dress"></i> <span id="tabP2Name">العروس</span>
+                        </button>
+                    </div>
+
+                    <!-- Task Cards Container -->
+                    <div id="tasksContainer" class="space-y-3.5">
+                        <!-- Rendered via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Footer tip -->
+                <div class="mt-6 pt-4 border-t border-emeraldCustom-800/60 text-xs text-center text-emeraldCustom-200/60">
+                    💡 <span class="text-goldCustom-300">ملاحظة:</span> كل مهمة يتم تحديدها تزيد رصيد الكيلومترات للزوجين معاً وتدفعهما إلى العاصمة التالية!
+                </div>
+            </section>
+
+            <!-- Column 2: Tadabbur & Unlocked Rewards -->
+            <section class="lg:col-span-5 space-y-6">
+                
+                <!-- Tadabbur Journal Card -->
+                <div class="glass-card rounded-3xl p-6">
+                    <h3 class="text-lg font-bold font-amiri text-goldCustom-400 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-feather-pointed"></i> تدبر اليوم واللطائف
+                    </h3>
+                    <p class="text-xs text-emeraldCustom-200/70 mb-3">شاركا آية لفتت انتباهكما أو معنى لطيف أثناء حفظ سورة البقرة اليوم:</p>
+                    <textarea id="tadabburInput" rows="3" class="w-full bg-emeraldCustom-950/80 border border-emeraldCustom-700/60 rounded-xl p-3 text-sm text-emeraldCustom-50 focus:outline-none focus:border-goldCustom-400 placeholder-emeraldCustom-700 resize-none transition" placeholder="مثال: آية (فَاذْكُرُونِي أَذْكُرْكُمْ) - ما أعظم أن يذكرنا ربي بالسماء..."></textarea>
+                    <div class="flex justify-between items-center mt-3">
+                        <span id="saveStatus" class="text-xs text-emeraldCustom-400 font-semibold opacity-0 transition-opacity">تم الحفظ بنجاح! ✨</span>
+                        <button onclick="saveTadabbur()" class="bg-goldCustom-500 hover:bg-goldCustom-400 text-emeraldCustom-950 font-bold px-5 py-2 rounded-xl text-xs transition shadow-lg shadow-goldCustom-500/10">
+                            حفظ التدبر <i class="fa-solid fa-bookmark mr-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- City Rewards Summary -->
+                <div class="glass-card rounded-3xl p-6">
+                    <h3 class="text-lg font-bold font-amiri text-goldCustom-400 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-gift"></i> صندوق المكافآت والمفاجآت
+                    </h3>
+                    <div id="rewardsList" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+                        <!-- Populated dynamic list of rewards -->
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+ <div class="glass-card rounded-3xl p-6"><h3 class="text-lg font-bold font-amiri text-goldCustom-400 mb-1">📗 رحلة سورة البقرة</h3><p class="text-[11px] text-emeraldCustom-200/60 mb-4">٢٨٦ آية · نحو ٤٨ وجهاً في المصحف</p><div id="pagesBox" class="space-y-5"></div></div>
+ <div class="glass-card rounded-3xl p-6"><h3 class="text-lg font-bold font-amiri text-goldCustom-400 mb-3">📊 آخر ٧ أيام</h3><div id="weekChart" class="flex items-end justify-between gap-2 h-28 mb-6"></div><h3 class="text-lg font-bold font-amiri text-goldCustom-400 mb-3">🏅 الأوسمة</h3><div id="badgesBox" class="grid grid-cols-4 gap-2"></div></div>
+ <div class="glass-card rounded-3xl p-6"><h3 class="text-lg font-bold font-amiri text-goldCustom-400 mb-3">🕊️ أرشيف التدبر</h3><div id="journalList" class="space-y-2 max-h-80 overflow-y-auto pr-1"></div></div>
+</section>
+</main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-emeraldCustom-200/40 py-4">
+        رحلة السير عبر العواصم • جعل الله القرآن العظيم ربيع قلوبكما ونور صدوركما 🌸
+    </footer>
+
+    <!-- City Reward Modal -->
+    <div id="rewardModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card-gold rounded-3xl p-6 md:p-8 max-w-md w-full text-center relative border border-goldCustom-400 shadow-2xl animate-fade-in">
+            <div class="w-16 h-16 bg-gradient-to-tr from-goldCustom-500 to-amber-300 rounded-full flex items-center justify-center text-emeraldCustom-950 text-3xl mx-auto mb-4 shadow-xl pulse-gold">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h3 id="modalCityTitle" class="text-2xl font-bold font-amiri text-goldCustom-300 mb-1">مدينة جديدة!</h3>
+            <p id="modalCityKm" class="text-xs text-amber-200/80 mb-4">تم الوصول بعد قطع X كم</p>
+            
+            <div class="bg-emeraldCustom-950/90 rounded-2xl p-4 border border-goldCustom-500/30 mb-6">
+                <span class="block text-xs text-gray-400 mb-1">مكافأة هذه المحطة</span>
+                <p id="modalRewardText" class="text-lg font-bold text-goldCustom-400 font-amiri">عشاء مميز من اختيار الفائز!</p>
+            </div>
+
+            <button onclick="closeRewardModal()" class="w-full bg-gradient-to-r from-goldCustom-500 to-amber-600 text-emeraldCustom-950 font-bold py-3 rounded-xl shadow-lg hover:brightness-110 transition">
+                متابعة الرحلة بنشاط 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Modal (Custom Names & Rewards) -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-3xl p-6 max-w-md w-full relative border border-emeraldCustom-700 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b border-emeraldCustom-800 pb-3">
+                <h3 class="text-lg font-bold font-amiri text-goldCustom-400">إعدادات الأسماء والمكافآت</h3>
+                <button onclick="closeSettingsModal()" class="text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-emeraldCustom-200 mb-1">اسم الطرف الأول (مثلاً: الخطيب / الزوج):</label>
+                    <input type="text" id="inputP1Name" class="w-full bg-emeraldCustom-950 border border-emeraldCustom-700 rounded-xl px-3 py-2 text-sm text-emeraldCustom-100 focus:outline-none focus:border-goldCustom-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-emeraldCustom-200 mb-1">اسم الطرف الثاني (مثلاً: الخطيبة / الزوجة):</label>
+                    <input type="text" id="inputP2Name" class="w-full bg-emeraldCustom-950 border border-emeraldCustom-700 rounded-xl px-3 py-2 text-sm text-emeraldCustom-100 focus:outline-none focus:border-goldCustom-400">
+                </div>
+            </div>
+
+            <div class="mt-5"><label class="block text-xs font-semibold text-emeraldCustom-200 mb-2">🎁 مكافآت المحطات (عدّلاها كما يحلو لكما):</label><div id="rewardInputs" class="space-y-2"></div></div>
+<div class="mt-5 flex flex-wrap gap-2 text-xs"><button onclick="exportData()" class="px-3 py-2 rounded-lg bg-emeraldCustom-900 text-emeraldCustom-100 hover:bg-emeraldCustom-800">💾 نسخة احتياطية</button><button onclick="$('impFile').click()" class="px-3 py-2 rounded-lg bg-emeraldCustom-900 text-emeraldCustom-100 hover:bg-emeraldCustom-800">📂 استيراد</button><button onclick="resetAll()" class="px-3 py-2 rounded-lg bg-red-950/60 text-red-300 hover:bg-red-900/60">🗑️ بدء من جديد</button><input type="file" id="impFile" accept=".json" class="hidden" onchange="importData(event)"></div>
+<div class="mt-6 flex gap-3">
+                <button onclick="saveSettings()" class="flex-1 bg-goldCustom-500 hover:bg-goldCustom-400 text-emeraldCustom-950 font-bold py-2.5 rounded-xl text-sm transition">
+                    حفظ التعديلات
+                </button>
+                <button onclick="closeSettingsModal()" class="px-4 bg-emeraldCustom-900 hover:bg-emeraldCustom-800 text-gray-300 font-semibold py-2.5 rounded-xl text-sm transition">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application JavaScript Logic -->
+    <script>
+        // 1. Data Configuration
+        const CITIES = [
+            { id: 'mecca', name: 'مكة المكرمة', km: 0, reward: 'انطلاقة الرحلة المباركة 🕋', icon: 'fa-kaaba' },
+            { id: 'medina', name: 'المدينة المنورة', km: 400, reward: 'جلسة قهوة وتدبر في مكان هادئ ☕', icon: 'fa-mosque' },
+            { id: 'jerusalem', name: 'القدس الشريف', km: 900, reward: 'عشاء فاخر يحضره الطرف الآخر 🍽️', icon: 'fa-archway' },
+            { id: 'damascus', name: 'دمشق', km: 1400, reward: 'هدية رمزية مفاجأة 🎁', icon: 'fa-monument' },
+            { id: 'baghdad', name: 'بغداد', km: 1900, reward: 'نزهة خاصة نهاية الأسبوع 🌿', icon: 'fa-landmark' },
+            { id: 'cairo', name: 'القاهرة', km: 2400, reward: 'رحلة ترفيهية مميزة 🚗', icon: 'fa-pyramid' },
+            { id: 'cordoba', name: 'قرطبة', km: 3000, reward: 'احتفال الختام والجائزة الكبرى 🎉', icon: 'fa-crown' }
+        ];
+
+        const TASK_DEFINITIONS = [
+            { id: 'memorize', title: 'حفظ وجه جديد من البقرة', km: 25, icon: 'fa-book-quran', color: 'text-amber-400' },
+            { id: 'review', title: 'مراجعة الحفظ السابق', km: 15, icon: 'fa-rotate', color: 'text-emerald-400' },
+            { id: 'adhkar', title: 'أذكار الصباح والمساء', km: 10, icon: 'fa-sun', color: 'text-goldCustom-400' },
+            { id: 'duaa', title: 'دعاء بظهر الغيب للشريك', km: 10, icon: 'fa-hands-praying', color: 'text-teal-300' }
+        ];
+
+        // 2. Application State
+        let state = {
+            partner1Name: 'العريس',
+            partner2Name: 'العروس',
+            activeTab: 'p1', // 'p1' or 'p2'
+            totalKm: 0,
+            streakDays: 1,
+            lastActiveDate: new Date().toISOString().split('T')[0],
+            tadabburText: '',
+            tasks: {
+                p1: { memorize: false, review: false, adhkar: false, duaa: false },
+                p2: { memorize: false, review: false, adhkar: false, duaa: false }
+            },
+            unlockedCities: ['mecca']
+        };
+
+        // 3. Initialize App
+        window.onload = function() {
+            loadSavedState();
+            checkStreak();
+            renderCities();
+            renderTasks();
+            renderRewards();
+            updateUI();
+        };
+
+        // Load State from LocalStorage
+        function loadSavedState() {
+            const saved = localStorage.getItem('quran_journey_state');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                } catch(e) {
+                    console.error("Error loading state", e);
+                }
+            }
+        }
+
+        // Save State to LocalStorage
+        function saveState() {
+            localStorage.setItem('quran_journey_state', JSON.stringify(state));
+        }
+
+        // Streak Tracker Calculation
+        function checkStreak() {
+            const today = new Date().toISOString().split('T')[0];
+            if (state.lastActiveDate) {
+                const lastDate = new Date(state.lastActiveDate);
+                const currDate = new Date(today);
+                const diffDays = Math.round((currDate - lastDate) / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 1) {
+                    // Consecutive day
+                } else if (diffDays > 1) {
+                    // Reset streak if missed more than a day
+                    state.streakDays = 1;
+                }
+            }
+            state.lastActiveDate = today;
+            saveState();
+        }
+
+        // 4. Render Cities Map
+        function renderCities() {
+            const container = document.getElementById('citiesContainer');
+            container.innerHTML = '';
+
+            CITIES.forEach((city, index) => {
+                const isUnlocked = state.totalKm >= city.km;
+                const isCurrent = getCurrentCity().id === city.id;
+
+                const node = document.createElement('div');
+                node.className = `city-node flex flex-col items-center cursor-pointer relative z-10`;
+                node.onclick = () => showCityReward(city);
+
+                let statusBg = 'bg-emeraldCustom-950 border-emeraldCustom-700 text-gray-500';
+                if (isUnlocked) {
+                    statusBg = 'bg-gradient-to-tr from-goldCustom-500 to-amber-400 border-white text-emeraldCustom-950 font-bold shadow-lg shadow-goldCustom-500/30';
+                }
+
+                node.innerHTML = `
+                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 ${statusBg} flex items-center justify-center text-lg md:text-xl transition-all ${isCurrent ? 'pulse-gold scale-110 border-goldCustom-300' : ''}">
+                        <i class="fa-solid ${city.icon}"></i>
+                    </div>
+                    <span class="mt-2 text-xs md:text-sm font-bold ${isUnlocked ? 'text-goldCustom-300' : 'text-gray-400'} font-amiri">${city.name}</span>
+                    <span class="text-[10px] text-emeraldCustom-200/60">${city.km} كم</span>
+                `;
+
+                container.appendChild(node);
+            });
+        }
+
+        // 5. Render Tasks Tab
+        function renderTasks() {
+            const container = document.getElementById('tasksContainer');
+            container.innerHTML = '';
+            
+            const currentPartnerTasks = state.tasks[state.activeTab];
+
+            TASK_DEFINITIONS.forEach(task => {
+                const isChecked = currentPartnerTasks[task.id];
+
+                const card = document.createElement('div');
+                card.className = `flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                    isChecked 
+                    ? 'bg-emeraldCustom-900/90 border-goldCustom-500/60 text-white shadow-md' 
+                    : 'bg-emeraldCustom-950/60 border-emeraldCustom-800/80 text-emeraldCustom-100 hover:border-emeraldCustom-700'
+                }`;
+                card.onclick = () => toggleTask(task.id);
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl ${isChecked ? 'bg-goldCustom-500 text-emeraldCustom-950' : 'bg-emeraldCustom-900 text-gray-400'} flex items-center justify-center transition">
+                            <i class="fa-solid ${task.icon} ${isChecked ? '' : task.color}"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold">${task.title}</h4>
+                            <span class="text-[11px] text-goldCustom-400/90 font-semibold">+${task.km} كيلومتر للمسار</span>
+                        </div>
+                    </div>
+                    <div class="w-6 h-6 rounded-lg border ${isChecked ? 'bg-goldCustom-400 border-goldCustom-400 text-emeraldCustom-950' : 'border-emeraldCustom-700'} flex items-center justify-center transition">
+                        ${isChecked ? '<i class="fa-solid fa-check text-xs font-bold"></i>' : ''}
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Toggle Task Completion
+        function toggleTask(taskId) {
+            const currentTab = state.activeTab;
+            const previousKm = calculateTotalKm();
+            
+            // Toggle task state
+            state.tasks[currentTab][taskId] = !state.tasks[currentTab][taskId];
+
+            // Recalculate total KM
+            const newKm = calculateTotalKm();
+            state.totalKm = newKm;
+
+            // Trigger celebration effect if KM increased
+            if (newKm > previousKm) {
+                triggerConfetti();
+                // Check if streak should increment
+                state.streakDays = Math.max(state.streakDays, 1);
+            }
+
+            // Check if new city unlocked
+            checkCityUnlocks();
+
+            saveState();
+            renderTasks();
+            updateUI();
+        }
+
+        // Calculate total distance based on completed tasks across both partners
+        function calculateTotalKm() {
+            let total = 0;
+            ['p1', 'p2'].forEach(partner => {
+                TASK_DEFINITIONS.forEach(task => {
+                    if (state.tasks[partner][task.id]) {
+                        total += task.km;
+                    }
+                });
+            });
+            return total;
+        }
+
+        // Check & Trigger modal for unlocked cities
+        function checkCityUnlocks() {
+            CITIES.forEach(city => {
+                if (state.totalKm >= city.km && !state.unlockedCities.includes(city.id)) {
+                    state.unlockedCities.push(city.id);
+                    showCityReward(city);
+                }
+            });
+        }
+
+        // Get Current City Object
+        function getCurrentCity() {
+            let current = CITIES[0];
+            for (let i = 0; i < CITIES.length; i++) {
+                if (state.totalKm >= CITIES[i].km) {
+                    current = CITIES[i];
+                }
+            }
+            return current;
+        }
+
+        // Update Dynamic UI Components
+        function updateUI() {
+            // Names update
+            document.getElementById('partner1NameDisplay').innerText = state.partner1Name;
+            document.getElementById('partner2NameDisplay').innerText = state.partner2Name;
+            document.getElementById('tabP1Name').innerText = state.partner1Name;
+            document.getElementById('tabP2Name').innerText = state.partner2Name;
+
+            // Stats update
+            document.getElementById('streakCount').innerText = `${state.streakDays} يوم`;
+            const maxKm = CITIES[CITIES.length - 1].km;
+            document.getElementById('totalKmDisplay').innerText = `${state.totalKm} / ${maxKm} كم`;
+
+            // Progress Bar
+            const percent = Math.min(Math.round((state.totalKm / maxKm) * 100), 100);
+            document.getElementById('progressBarFill').style.width = `${percent}%`;
+            document.getElementById('progressPercentageText').innerText = `${percent}% مكتمل`;
+
+            // Current City
+            const currCity = getCurrentCity();
+            document.getElementById('currentCityBadge').innerText = `الموقع الحالي: ${currCity.name}`;
+
+            // Avatar Position Calculation along SVG path
+            const avatar = document.getElementById('travelerAvatar');
+            const totalCitiesCount = CITIES.length;
+            const progressRatio = Math.min(state.totalKm / maxKm, 1);
+            
+            // Positioning across map container width (percentages for smooth alignment)
+            const mapWidth = 100; 
+            const calcRightPercent = (1 - progressRatio) * 85 + 5; // bounds right alignment
+            avatar.style.right = `${calcRightPercent}%`;
+
+            // Render updated map nodes
+            renderCities();
+            renderRewards();
+
+            // Load Tadabbur Text
+            if (state.tadabburText && document.getElementById('tadabburInput').value === '') {
+                document.getElementById('tadabburInput').value = state.tadabburText;
+            }
+        }
+
+        // Switch Tabs between partners
+        function switchTaskTab(tab) {
+            state.activeTab = tab;
+            const btnP1 = document.getElementById('tabBtnP1');
+            const btnP2 = document.getElementById('tabBtnP2');
+
+            if (tab === 'p1') {
+                btnP1.className = "flex-1 py-2.5 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 bg-gradient-to-r from-goldCustom-500 to-amber-600 text-emeraldCustom-950 shadow-md";
+                btnP2.className = "flex-1 py-2.5 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 text-emeraldCustom-200/70 hover:text-white";
+            } else {
+                btnP2.className = "flex-1 py-2.5 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 bg-gradient-to-r from-goldCustom-500 to-amber-600 text-emeraldCustom-950 shadow-md";
+                btnP1.className = "flex-1 py-2.5 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 text-emeraldCustom-200/70 hover:text-white";
+            }
+
+            renderTasks();
+        }
+
+        // Render Rewards List
+        function renderRewards() {
+            const container = document.getElementById('rewardsList');
+            container.innerHTML = '';
+
+            CITIES.forEach(city => {
+                const isUnlocked = state.totalKm >= city.km;
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-xl border flex items-center justify-between text-xs transition ${
+                    isUnlocked 
+                    ? 'bg-emeraldCustom-900/60 border-goldCustom-500/40 text-emeraldCustom-100' 
+                    : 'bg-emeraldCustom-950/40 border-emeraldCustom-800/40 text-gray-500 opacity-70'
+                }`;
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid ${isUnlocked ? 'fa-lock-open text-goldCustom-400' : 'fa-lock text-gray-600'} text-sm"></i>
+                        <div>
+                            <span class="font-bold text-amber-300 block">${city.name} (${city.km} كم)</span>
+                            <span>${city.reward}</span>
+                        </div>
+                    </div>
+                    ${isUnlocked ? '<span class="text-[10px] bg-goldCustom-500/20 text-goldCustom-400 px-2 py-0.5 rounded-md font-bold">مفتوحة</span>' : ''}
+                `;
+
+                container.appendChild(item);
+            });
+        }
+
+        // Save Tadabbur Note
+        function saveTadabbur() {
+            const val = document.getElementById('tadabburInput').value;
+            state.tadabburText = val;
+            saveState();
+
+            const status = document.getElementById('saveStatus');
+            status.style.opacity = '1';
+            setTimeout(() => {
+                status.style.opacity = '0';
+            }, 2500);
+        }
+
+        // Reward Modal Functions
+        function showCityReward(city) {
+            document.getElementById('modalCityTitle').innerText = `مدينة ${city.name}`;
+            document.getElementById('modalCityKm').innerText = `المسافة المقطوعة: ${city.km} كم`;
+            document.getElementById('modalRewardText').innerText = city.reward;
+            document.getElementById('rewardModal').classList.remove('hidden');
+        }
+
+        function closeRewardModal() {
+            document.getElementById('rewardModal').classList.add('hidden');
+        }
+
+        // Settings Modal Functions
+        function openSettingsModal() {
+            document.getElementById('inputP1Name').value = state.partner1Name;
+            document.getElementById('inputP2Name').value = state.partner2Name;
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function saveSettings() {
+            const p1 = document.getElementById('inputP1Name').value.trim();
+            const p2 = document.getElementById('inputP2Name').value.trim();
+
+            if (p1) state.partner1Name = p1;
+            if (p2) state.partner2Name = p2;
+
+            saveState();
+            updateUI();
+            closeSettingsModal();
+        }
+
+        // Visual Confetti Celebration Animation
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 70,
+                    spread: 60,
+                    origin: { y: 0.7 },
+                    colors: ['#eab308', '#10b981', '#facc15', '#ffffff']
+                });
+            }
+        }
+    </script>
+<script>
+// ===== Enhancements =====
+const $=id=>document.getElementById(id);
+const fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const todayStr=()=>fmt(new Date());
+const off=i=>{const d=new Date();d.setDate(d.getDate()-i);return d};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const blank=()=>({memorize:false,review:false,adhkar:false,duaa:false});
+const MAXDAY=TASK_DEFINITIONS.reduce((s,t)=>s+t.km,0)*2, PG=48;
+const VERSES=[
+['وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ فَهَلْ مِن مُّدَّكِرٍ','القمر ١٧'],
+['فَاذْكُرُونِي أَذْكُرْكُمْ','البقرة ١٥٢'],
+['وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا','المزمل ٤'],
+['إِنَّ مَعَ الْعُسْرِ يُسْرًا','الشرح ٦'],
+['وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً','الروم ٢١'],
+['وَقُل رَّبِّ زِدْنِي عِلْمًا','طه ١١٤'],
+['خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ','حديث شريف · رواه البخاري']];
+
+function ensure(){state.history=state.history||{};state.bankedKm=state.bankedKm||0;state.pages=state.pages||{p1:0,p2:0};state.journal=state.journal||[];state.rewards=state.rewards||{};state.best=state.best||0}
+const _load=loadSavedState;loadSavedState=function(){_load();ensure()};
+const getReward=c=>state.rewards[c.id]||c.reward;
+const dayKm=d=>d===todayStr()?calculateTotalKm():(state.history[d]||0);
+function streak(){let n=0,i=calculateTotalKm()>0?0:1;while(dayKm(fmt(off(i)))>0){n++;i++}return n}
+calculateTotalKm=function(){let t=0;['p1','p2'].forEach(p=>TASK_DEFINITIONS.forEach(k=>{if(state.tasks[p][k.id])t+=k.km}));return t};
+const allDone=()=>calculateTotalKm()===MAXDAY;
+
+// New day: bank yesterday's distance, reset today's tasks
+checkStreak=function(){const t=todayStr(),last=state.lastActiveDate;
+ if(last&&last!==t){const km=calculateTotalKm();state.history[last]=km;state.bankedKm+=km;state.tasks={p1:blank(),p2:blank()};state.dayDone=false}
+ state.lastActiveDate=t;state.totalKm=state.bankedKm+calculateTotalKm();saveState()};
+
+toggleTask=function(id){const tab=state.activeTab,prev=state.totalKm;
+ state.tasks[tab][id]=!state.tasks[tab][id];state.totalKm=state.bankedKm+calculateTotalKm();
+ if(state.totalKm>prev)triggerConfetti();
+ checkCityUnlocks();
+ if(allDone()&&!state.dayDone){state.dayDone=true;confetti({particleCount:180,spread:100,origin:{y:.6}});toast('ما شاء الله! أتمتما مهام اليوم كاملة 🌟')}
+ if(!allDone())state.dayDone=false;
+ saveState();renderTasks();updateUI()};
+
+function toast(m){let t=$('toast');if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t)}t.textContent=m;requestAnimationFrame(()=>t.classList.add('show'));clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),3500)}
+
+showCityReward=function(c){const un=state.totalKm>=c.km;
+ $('modalCityTitle').innerText='مدينة '+c.name;
+ $('modalCityKm').innerText=un?'المسافة المقطوعة: '+c.km+' كم ✅':'🔒 باقي '+(c.km-state.totalKm)+' كم للوصول';
+ $('modalRewardText').innerText=getReward(c);$('rewardModal').classList.remove('hidden')};
+
+renderRewards=function(){const box=$('rewardsList');box.innerHTML='';
+ CITIES.forEach(c=>{const un=state.totalKm>=c.km,d=document.createElement('div');
+ d.className='p-3 rounded-xl border flex items-center justify-between text-xs transition '+(un?'bg-emeraldCustom-900/60 border-goldCustom-500/40 text-emeraldCustom-100':'bg-emeraldCustom-950/40 border-emeraldCustom-800/40 text-gray-500 opacity-70');
+ d.innerHTML='<div class="flex items-center gap-2.5"><i class="fa-solid '+(un?'fa-lock-open text-goldCustom-400':'fa-lock text-gray-600')+' text-sm"></i><div><span class="font-bold text-amber-300 block">'+c.name+' ('+c.km+' كم)</span><span>'+esc(getReward(c))+'</span></div></div>'+(un?'<span class="text-[10px] bg-goldCustom-500/20 text-goldCustom-400 px-2 py-0.5 rounded-md font-bold">مفتوحة</span>':'');
+ box.appendChild(d)})};
+
+function placeAvatar(){const n=CITIES.length,k=state.totalKm,a=$('travelerAvatar');let i=0;
+ for(;i<n-1;i++)if(k<CITIES[i+1].km)break;
+ const r=i>=n-1?1:(i+(k-CITIES[i].km)/(CITIES[i+1].km-CITIES[i].km))/(n-1);
+ a.style.right='calc(48px + (100% - 96px) * '+r+')';a.style.top='calc(50% - 38px)';a.style.transform='translate(50%,-100%)';
+ $('avatarLabel').innerText=k>=3000?'وصلنا! 🎉':'نحن هنا!'}
+
+function changePages(p,d){state.pages[p]=Math.max(0,Math.min(PG,state.pages[p]+d));
+ if(state.pages[p]===PG&&d>0){confetti({particleCount:200,spread:110,origin:{y:.6}});toast('ما شاء الله! ختمتما حفظ البقرة 🏆')}
+ saveState();updateUI()}
+
+const BADGES=[
+['🌱','الخطوة الأولى',()=>state.totalKm>0],['🔥','٣ أيام متتالية',()=>state.best>=3],['⚡','أسبوع كامل',()=>state.best>=7],['📖','١٠ أوجه',()=>state.pages.p1+state.pages.p2>=10],
+['🌟','يوم مثالي',()=>allDone()||Object.values(state.history).some(v=>v>=MAXDAY)],['🧭','منتصف الطريق',()=>state.totalKm>=1500],['👑','وصلتما قرطبة',()=>state.totalKm>=3000],['🏆','ختمتما البقرة',()=>state.pages.p1>=PG||state.pages.p2>=PG]];
+
+function renderExtras(){const st=streak();state.best=Math.max(state.best,st);
+ $('streakCount').innerText=st+' يوم';
+ const tk=calculateTotalKm();$('statToday').innerText=tk+' / '+MAXDAY+' كم';
+ $('statPages').innerText=(state.pages.p1+state.pages.p2)+' / '+PG*2;
+ $('statDays').innerText=(Object.values(state.history).filter(v=>v>0).length+(tk>0?1:0))+' · '+state.best+' 🔥';
+ const nx=CITIES.find(c=>c.km>state.totalKm);$('statNext').innerText=nx?(nx.km-state.totalKm)+' كم إلى '+nx.name:'🎉 أتممتما الرحلة!';
+ $('pagesBox').innerHTML=['p1','p2'].map((p,i)=>{const v=state.pages[p],pc=Math.round(v/PG*100);
+  return '<div><div class="flex justify-between items-center text-sm mb-2"><span class="font-bold">'+esc(i?state.partner2Name:state.partner1Name)+'</span><div class="flex items-center gap-2"><button onclick="changePages(\''+p+'\',-1)" class="w-7 h-7 rounded-lg bg-emeraldCustom-900 hover:bg-emeraldCustom-800">−</button><span class="w-20 text-center text-goldCustom-300 font-bold text-xs">'+v+' / '+PG+' وجه</span><button onclick="changePages(\''+p+'\',1)" class="w-7 h-7 rounded-lg bg-goldCustom-500 text-emeraldCustom-950 font-bold hover:bg-goldCustom-400">+</button></div></div><div class="h-2.5 rounded-full bg-emeraldCustom-950 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-emeraldCustom-500 to-goldCustom-400 transition-all duration-700" style="width:'+pc+'%"></div></div><div class="text-[10px] text-emeraldCustom-200/50 mt-1">'+pc+'% من السورة</div></div>'}).join('');
+ let w='';for(let i=6;i>=0;i--){const d=off(i),k=dayKm(fmt(d)),h=Math.max(4,k/MAXDAY*100);
+  w+='<div class="flex-1 flex flex-col items-center justify-end h-full gap-1"><span class="text-[9px] text-goldCustom-300">'+(k||'')+'</span><div class="w-full rounded-t-lg '+(i?'bg-emeraldCustom-700':'bg-gradient-to-t from-goldCustom-600 to-goldCustom-400')+'" style="height:'+h*.6+'%"></div><span class="text-[10px] text-emeraldCustom-200/60">'+d.toLocaleDateString('ar-EG',{weekday:'short'})+'</span></div>'}
+ $('weekChart').innerHTML=w;
+ $('badgesBox').innerHTML=BADGES.map(b=>'<div class="text-center '+(b[2]()?'':'badge-lock')+'" title="'+b[1]+'"><div class="text-2xl">'+b[0]+'</div><div class="text-[9px] leading-tight text-emeraldCustom-100/80">'+b[1]+'</div></div>').join('');
+ renderJournal()}
+
+function renderJournal(){const b=$('journalList');
+ b.innerHTML=state.journal.length?state.journal.map((e,i)=>'<div class="bg-emeraldCustom-950/60 border border-emeraldCustom-800/60 rounded-xl p-3 text-xs"><div class="flex justify-between text-[10px] text-goldCustom-400/80 mb-1"><span>'+new Date(e.d+'T12:00').toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'})+'</span><button onclick="delJournal('+i+')" class="hover:text-red-300">حذف</button></div><p class="leading-6 whitespace-pre-line">'+esc(e.t)+'</p></div>').join(''):'<p class="text-xs text-emeraldCustom-200/50 text-center py-6">لم تُدوَّن لطائف بعد.<br>ابدآ بأول تدبّر لكما ✨</p>'}
+function delJournal(i){state.journal.splice(i,1);saveState();renderJournal()}
+saveTadabbur=function(){const v=$('tadabburInput').value.trim();if(!v)return;
+ state.journal.unshift({d:todayStr(),t:v});state.tadabburText='';$('tadabburInput').value='';saveState();renderJournal();
+ const s=$('saveStatus');s.style.opacity='1';setTimeout(()=>s.style.opacity='0',2500)};
+
+const _upd=updateUI;updateUI=function(){_upd();renderExtras();placeAvatar()};
+
+openSettingsModal=function(){$('inputP1Name').value=state.partner1Name;$('inputP2Name').value=state.partner2Name;
+ $('rewardInputs').innerHTML=CITIES.slice(1).map(c=>'<div class="flex items-center gap-2"><span class="w-24 shrink-0 text-[11px] text-goldCustom-300">'+c.name+'</span><input data-c="'+c.id+'" value="'+esc(getReward(c))+'" class="rw flex-1 bg-emeraldCustom-950 border border-emeraldCustom-700 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-goldCustom-400"></div>').join('');
+ $('settingsModal').classList.remove('hidden')};
+saveSettings=function(){const a=$('inputP1Name').value.trim(),b=$('inputP2Name').value.trim();if(a)state.partner1Name=a;if(b)state.partner2Name=b;
+ document.querySelectorAll('.rw').forEach(i=>{const c=CITIES.find(x=>x.id===i.dataset.c),v=i.value.trim();if(v&&v!==c.reward)state.rewards[c.id]=v;else delete state.rewards[c.id]});
+ saveState();updateUI();closeSettingsModal()};
+function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'}));a.download='quran-journey-backup-'+todayStr()+'.json';a.click()}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=Object.assign(state,JSON.parse(r.result));ensure();saveState();location.reload()}catch(x){toast('الملف غير صالح')}};r.readAsText(f)}
+function resetAll(){if(confirm('سيتم حذف كل التقدم نهائياً. هل أنتما متأكدان؟')){localStorage.removeItem('quran_journey_state');location.reload()}}
+
+window.onload=function(){loadSavedState();checkStreak();renderCities();renderTasks();renderRewards();
+ const v=VERSES[Math.floor(Date.now()/864e5)%VERSES.length];$('dailyVerse').textContent=v[1].startsWith('حديث')?v[0]:'﴿ '+v[0]+' ﴾';$('dailySrc').textContent=v[1];
+ updateUI();switchTaskTab(state.activeTab||'p1')};
+</script>
+</body>
+</html>
