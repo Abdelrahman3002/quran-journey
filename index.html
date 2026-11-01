@@ -420,67 +420,6 @@ body{background-image:radial-gradient(circle at 50% -10%,rgba(234,179,8,.14),tra
         };
 
         // 3. Initialize App
-        window.onload = function() {
-            // Listen for real-time updates from the other device
-            _supabase
-            .channel('public:shared_journey')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_journey', filter: `id=eq.${SYNC_ID}` }, payload => {
-                if (payload.new && payload.new.state) {
-                    state = payload.new.state;
-                    ensure();
-                    updateUI();
-                    renderTasks();
-                    renderRewards();
-                }
-            })
-            .subscribe();
-            loadSavedState();
-            checkStreak();
-            renderCities();
-            renderTasks();
-            renderRewards();
-            updateUI();
-            
-        };
-
-        // Load State (Checks Cloud first, falls back to LocalStorage)
-        async function loadSavedState() {
-            try {
-                const { data, error } = await _supabase
-                    .from('shared_journey')
-                    .select('state')
-                    .eq('id', SYNC_ID)
-                    .single();
-
-                if (data && data.state) {
-                    state = { ...state, ...data.state };
-                } else {
-                    // Fallback to local storage if remote is empty
-                    const saved = localStorage.getItem('quran_journey_state');
-                    if (saved) state = { ...state, ...JSON.parse(saved) };
-                }
-            } catch(e) {
-                console.error("Error loading from cloud, using local:", e);
-                const saved = localStorage.getItem('quran_journey_state');
-                if (saved) state = { ...state, ...JSON.parse(saved) };
-            }
-            ensure();
-        }
-
-        // Save State to LocalStorage
-        async function saveState() {
-            // Save locally immediately
-            localStorage.setItem('quran_journey_state', JSON.stringify(state));
-
-            // Push to Supabase Cloud
-            const { error } = await _supabase
-                .from('shared_journey')
-                .upsert({ id: SYNC_ID, state: state, updated_at: new Date() });
-
-            if (error) {
-                console.error("Cloud sync failed:", error);
-            }
-        }
 
         // Streak Tracker Calculation
         function checkStreak() {
@@ -796,7 +735,6 @@ const VERSES=[
 ['خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ','حديث شريف · رواه البخاري']];
 
 function ensure(){state.history=state.history||{};state.bankedKm=state.bankedKm||0;state.pages=state.pages||{p1:0,p2:0};state.journal=state.journal||[];state.rewards=state.rewards||{};state.best=state.best||0}
-const _load=loadSavedState;loadSavedState=function(){_load();ensure()};
 const getReward=c=>state.rewards[c.id]||c.reward;
 const dayKm=d=>d===todayStr()?calculateTotalKm():(state.history[d]||0);
 function streak(){let n=0,i=calculateTotalKm()>0?0:1;while(dayKm(fmt(off(i)))>0){n++;i++}return n}
@@ -806,7 +744,7 @@ const allDone=()=>calculateTotalKm()===MAXDAY;
 // New day: bank yesterday's distance, reset today's tasks
 checkStreak=function(){const t=todayStr(),last=state.lastActiveDate;
  if(last&&last!==t){const km=calculateTotalKm();state.history[last]=km;state.bankedKm+=km;state.tasks={p1:blank(),p2:blank()};state.dayDone=false}
- state.lastActiveDate=t;state.totalKm=state.bankedKm+calculateTotalKm();saveState()};
+ const ch=last!==t;state.lastActiveDate=t;state.totalKm=state.bankedKm+calculateTotalKm();if(ch)saveState()};
 
 toggleTask=function(id){const tab=state.activeTab,prev=state.totalKm;
  state.tasks[tab][id]=!state.tasks[tab][id];state.totalKm=state.bankedKm+calculateTotalKm();
@@ -873,12 +811,35 @@ saveSettings=function(){const a=$('inputP1Name').value.trim(),b=$('inputP2Name')
  document.querySelectorAll('.rw').forEach(i=>{const c=CITIES.find(x=>x.id===i.dataset.c),v=i.value.trim();if(v&&v!==c.reward)state.rewards[c.id]=v;else delete state.rewards[c.id]});
  saveState();updateUI();closeSettingsModal()};
 function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'}));a.download='quran-journey-backup-'+todayStr()+'.json';a.click()}
-function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=Object.assign(state,JSON.parse(r.result));ensure();saveState();location.reload()}catch(x){toast('الملف غير صالح')}};r.readAsText(f)}
-function resetAll(){if(confirm('سيتم حذف كل التقدم نهائياً. هل أنتما متأكدان؟')){localStorage.removeItem('quran_journey_state');location.reload()}}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=Object.assign(state,JSON.parse(r.result));ensure();saveState().then(()=>location.reload())}catch(x){toast('الملف غير صالح')}};r.readAsText(f)}
+async function resetAll(){if(confirm('سيتم حذف كل التقدم نهائياً (على الجهازين). هل أنتما متأكدان؟')){localStorage.removeItem('quran_journey_state');try{await _supabase.from('shared_journey').upsert({id:SYNC_ID,state:{_v:Date.now(),_by:'reset'}})}catch(e){}location.reload()}}
 
-window.onload=function(){loadSavedState();checkStreak();renderCities();renderTasks();renderRewards();
+// ===== Supabase sync (fixed) =====
+const CLIENT_ID=Math.random().toString(36).slice(2);
+function syncBadge(t,ok){let b=$('syncBadge');if(!b){b=document.createElement('div');b.id='syncBadge';b.style.cssText='position:fixed;bottom:10px;right:10px;z-index:45;font-size:11px;padding:4px 10px;border-radius:999px;background:rgba(2,44,34,.92);border:1px solid rgba(234,179,8,.3);max-width:85vw';document.body.appendChild(b)}b.textContent=t;b.style.color=ok?'#6ee7b7':'#fca5a5'}
+async function pullCloud(){const {data,error}=await _supabase.from('shared_journey').select('state').eq('id',SYNC_ID).maybeSingle();if(error)throw error;return data&&data.state?data.state:null}
+async function loadSavedState(){
+ let local=null;try{local=JSON.parse(localStorage.getItem('quran_journey_state')||'null')}catch(e){}
+ let cloud=null;try{cloud=await pullCloud();syncBadge('☁️ متصل بالسحابة',true)}catch(e){console.error(e);syncBadge('⚠️ تعذّر الاتصال بالسحابة: '+(e.message||e),false)}
+ const pick=(cloud&&(!local||(cloud._v||0)>=(local._v||0)))?cloud:local;
+ if(pick)state={...state,...pick};ensure()}
+async function saveState(){state._v=Date.now();state._by=CLIENT_ID;
+ try{localStorage.setItem('quran_journey_state',JSON.stringify(state))}catch(e){}
+ syncBadge('⏳ جارٍ الحفظ…',true);
+ try{const {error}=await _supabase.from('shared_journey').upsert({id:SYNC_ID,state:state});if(error)throw error;
+  syncBadge('☁️ تم الحفظ '+new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}),true)}
+ catch(e){console.error('Cloud sync failed:',e);syncBadge('⚠️ لم يُحفظ في السحابة: '+(e.message||e),false)}}
+function applyRemote(r){if(!r||r._by===CLIENT_ID||(r._v||0)<=(state._v||0))return;
+ if(r._by==='reset'){localStorage.removeItem('quran_journey_state');location.reload();return}
+ const tab=state.activeTab;state={...state,...r,activeTab:tab};ensure();checkStreak();renderCities();renderTasks();updateUI();switchTaskTab(tab||'p1')}
+async function poll(){try{applyRemote(await pullCloud())}catch(e){}}
+
+window.onload=async function(){
+ await loadSavedState();checkStreak();renderCities();renderTasks();renderRewards();
  const v=VERSES[Math.floor(Date.now()/864e5)%VERSES.length];$('dailyVerse').textContent=v[1].startsWith('حديث')?v[0]:'﴿ '+v[0]+' ﴾';$('dailySrc').textContent=v[1];
- updateUI();switchTaskTab(state.activeTab||'p1')};
+ updateUI();switchTaskTab(state.activeTab||'p1');
+ try{_supabase.channel('shared_journey_ch').on('postgres_changes',{event:'*',schema:'public',table:'shared_journey',filter:'id=eq.'+SYNC_ID},p=>applyRemote(p.new&&p.new.state)).subscribe()}catch(e){console.error(e)}
+ setInterval(poll,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll()})};
 </script>
 </body>
 </html>
