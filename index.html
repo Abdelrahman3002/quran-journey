@@ -6,6 +6,7 @@
     <title>رحلة السير عبر العواصم | التحدي القرآني المبارك</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts (Amiri & Cairo) -->
@@ -379,6 +380,11 @@ body{background-image:radial-gradient(circle at 50% -10%,rgba(234,179,8,.14),tra
 
     <!-- Application JavaScript Logic -->
     <script>
+                // Initialize Supabase Client
+        const SUPABASE_URL = 'https://ylfeivkvanwbsagrwrwz.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_Id30lDWvhPvHDd6Hzjf7gA_S6Wx3qyb';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SYNC_ID = 'couple_shared_session'; // Shared key for both devices
         // 1. Data Configuration
         const CITIES = [
             { id: 'cairo_start', name: 'القاهرة', km: 0, reward: 'انطلاقة الرحلة المباركة من أرض الكنانة 🌅', icon: 'fa-landmark' },
@@ -415,30 +421,65 @@ body{background-image:radial-gradient(circle at 50% -10%,rgba(234,179,8,.14),tra
 
         // 3. Initialize App
         window.onload = function() {
+            // Listen for real-time updates from the other device
+            _supabase
+            .channel('public:shared_journey')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_journey', filter: `id=eq.${SYNC_ID}` }, payload => {
+                if (payload.new && payload.new.state) {
+                    state = payload.new.state;
+                    ensure();
+                    updateUI();
+                    renderTasks();
+                    renderRewards();
+                }
+            })
+            .subscribe();
             loadSavedState();
             checkStreak();
             renderCities();
             renderTasks();
             renderRewards();
             updateUI();
+            
         };
 
-        // Load State from LocalStorage
-        function loadSavedState() {
-            const saved = localStorage.getItem('quran_journey_state');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    state = { ...state, ...parsed };
-                } catch(e) {
-                    console.error("Error loading state", e);
+        // Load State (Checks Cloud first, falls back to LocalStorage)
+        async function loadSavedState() {
+            try {
+                const { data, error } = await _supabase
+                    .from('shared_journey')
+                    .select('state')
+                    .eq('id', SYNC_ID)
+                    .single();
+
+                if (data && data.state) {
+                    state = { ...state, ...data.state };
+                } else {
+                    // Fallback to local storage if remote is empty
+                    const saved = localStorage.getItem('quran_journey_state');
+                    if (saved) state = { ...state, ...JSON.parse(saved) };
                 }
+            } catch(e) {
+                console.error("Error loading from cloud, using local:", e);
+                const saved = localStorage.getItem('quran_journey_state');
+                if (saved) state = { ...state, ...JSON.parse(saved) };
             }
+            ensure();
         }
 
         // Save State to LocalStorage
-        function saveState() {
+        async function saveState() {
+            // Save locally immediately
             localStorage.setItem('quran_journey_state', JSON.stringify(state));
+
+            // Push to Supabase Cloud
+            const { error } = await _supabase
+                .from('shared_journey')
+                .upsert({ id: SYNC_ID, state: state, updated_at: new Date() });
+
+            if (error) {
+                console.error("Cloud sync failed:", error);
+            }
         }
 
         // Streak Tracker Calculation
