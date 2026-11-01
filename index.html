@@ -194,7 +194,7 @@ body{background-image:radial-gradient(circle at 50% -10%,rgba(234,179,8,.14),tra
                     <p class="text-xs md:text-sm text-emerald-200/60">كل إنجاز ينقلكما مسافة أقرب إلى العاصمة التالية والمكافأة الجليلة!</p>
                 </div>
                 <span id="currentCityBadge" class="bg-gradient-to-r from-goldCustom-600 to-amber-600 text-emeraldCustom-950 font-bold px-4 py-1.5 rounded-full text-xs md:text-sm shadow-md">
-                    الموقع الحالي: مكة المكرمة
+                    الموقع الحالي: القاهرة
                 </span>
             </div>
 
@@ -217,7 +217,7 @@ body{background-image:radial-gradient(circle at 50% -10%,rgba(234,179,8,.14),tra
                             <span id="avatarLabel">نحن هنا!</span>
                         </div>
                         <div class="w-10 h-10 rounded-full bg-goldCustom-400 border-2 border-white flex items-center justify-center shadow-lg text-emeraldCustom-950 text-lg">
-                            <i class="fa-solid fa-kaaba"></i>
+                            <i class="fa-solid fa-person-walking"></i>
                         </div>
                     </div>
 
@@ -229,7 +229,7 @@ body{background-image:radial-gradient(circle at 50% -10%,rgba(234,179,8,.14),tra
                 <div class="flex justify-between text-xs text-emeraldCustom-200/80 mb-2 font-semibold">
                     <span>بداية المسار (0 كم)</span>
                     <span id="progressPercentageText" class="text-goldCustom-400 font-bold">0% مكتمل</span>
-                    <span>النهاية - قرطبة (3000 كم)</span>
+                    <span>النهاية - مكة المكرمة (3000 كم)</span>
                 </div>
                 <div class="w-full bg-emeraldCustom-900 rounded-full h-4 overflow-hidden p-0.5 border border-emeraldCustom-700/40">
                     <div id="progressBarFill" class="bg-gradient-to-r from-emeraldCustom-500 via-goldCustom-500 to-amber-400 h-full rounded-full transition-all duration-700 w-0 shadow-lg"></div>
@@ -381,13 +381,13 @@ body{background-image:radial-gradient(circle at 50% -10%,rgba(234,179,8,.14),tra
     <script>
         // 1. Data Configuration
         const CITIES = [
-            { id: 'mecca', name: 'مكة المكرمة', km: 0, reward: 'انطلاقة الرحلة المباركة 🕋', icon: 'fa-kaaba' },
-            { id: 'medina', name: 'المدينة المنورة', km: 400, reward: 'جلسة قهوة وتدبر في مكان هادئ ☕', icon: 'fa-mosque' },
-            { id: 'jerusalem', name: 'القدس الشريف', km: 900, reward: 'عشاء فاخر يحضره الطرف الآخر 🍽️', icon: 'fa-archway' },
-            { id: 'damascus', name: 'دمشق', km: 1400, reward: 'هدية رمزية مفاجأة 🎁', icon: 'fa-monument' },
-            { id: 'baghdad', name: 'بغداد', km: 1900, reward: 'نزهة خاصة نهاية الأسبوع 🌿', icon: 'fa-landmark' },
-            { id: 'cairo', name: 'القاهرة', km: 2400, reward: 'رحلة ترفيهية مميزة 🚗', icon: 'fa-pyramid' },
-            { id: 'cordoba', name: 'قرطبة', km: 3000, reward: 'احتفال الختام والجائزة الكبرى 🎉', icon: 'fa-crown' }
+            { id: 'cairo_start', name: 'القاهرة', km: 0, reward: 'انطلاقة الرحلة المباركة من أرض الكنانة 🌅', icon: 'fa-landmark' },
+            { id: 'tur', name: 'طور سيناء', km: 400, reward: 'جلسة قهوة وتدبر في مكان هادئ ☕', icon: 'fa-mountain' },
+            { id: 'aqsa', name: 'بيت المقدس', km: 900, reward: 'عشاء فاخر يحضره الطرف الآخر 🍽️', icon: 'fa-star-and-crescent' },
+            { id: 'sham', name: 'دمشق', km: 1400, reward: 'هدية رمزية مفاجأة 🎁', icon: 'fa-archway' },
+            { id: 'tabuk', name: 'تبوك', km: 1900, reward: 'نزهة خاصة نهاية الأسبوع 🌿', icon: 'fa-campground' },
+            { id: 'madinah', name: 'المدينة المنورة', km: 2400, reward: 'رحلة ترفيهية مميزة 🚗', icon: 'fa-mosque' },
+            { id: 'makkah', name: 'مكة المكرمة', km: 3000, reward: 'احتفال الختام والجائزة الكبرى 🎉', icon: 'fa-kaaba' }
         ];
 
         const TASK_DEFINITIONS = [
@@ -410,7 +410,7 @@ body{background-image:radial-gradient(circle at 50% -10%,rgba(234,179,8,.14),tra
                 p1: { memorize: false, review: false, adhkar: false, duaa: false },
                 p2: { memorize: false, review: false, adhkar: false, duaa: false }
             },
-            unlockedCities: ['mecca']
+            unlockedCities: ['cairo_start']
         };
 
         // 3. Initialize App
@@ -800,7 +800,7 @@ function changePages(p,d){state.pages[p]=Math.max(0,Math.min(PG,state.pages[p]+d
 
 const BADGES=[
 ['🌱','الخطوة الأولى',()=>state.totalKm>0],['🔥','٣ أيام متتالية',()=>state.best>=3],['⚡','أسبوع كامل',()=>state.best>=7],['📖','١٠ أوجه',()=>state.pages.p1+state.pages.p2>=10],
-['🌟','يوم مثالي',()=>allDone()||Object.values(state.history).some(v=>v>=MAXDAY)],['🧭','منتصف الطريق',()=>state.totalKm>=1500],['👑','وصلتما قرطبة',()=>state.totalKm>=3000],['🏆','ختمتما البقرة',()=>state.pages.p1>=PG||state.pages.p2>=PG]];
+['🌟','يوم مثالي',()=>allDone()||Object.values(state.history).some(v=>v>=MAXDAY)],['🧭','منتصف الطريق',()=>state.totalKm>=1500],['🕋','وصلتما مكة',()=>state.totalKm>=3000],['🏆','ختمتما البقرة',()=>state.pages.p1>=PG||state.pages.p2>=PG]];
 
 function renderExtras(){const st=streak();state.best=Math.max(state.best,st);
  $('streakCount').innerText=st+' يوم';
